@@ -1,0 +1,58 @@
+.video-player-wrapper{
+    width: 100%;
+    position: relative;
+    padding: 10px 20px;
+    margin: 0px;
+
+    .video-payer{
+        position: sticky;
+        top: 10px;
+    }
+
+    .video-details{
+        .video-title{
+            margin-top: 10px;
+            font-size: 22px;
+        }
+        .channel-details{
+            .channel{
+                display: flex;
+                align-items: center;
+                margin: 10px 0px;
+                .channel-logo{
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 50px;
+                    margin-right: 10px;
+                }
+                .channel-desc{
+                    font-size: 15px;
+                    font-weight: 500;
+                }
+            }
+            .video-description{
+                padding: 10px;
+                background-color: #efefef;
+
+                .top-sec{
+                    display: flex;
+                    align-items: center;
+                    font-weight: 500;
+
+                    .views-count{
+                        margin-right: 10px;
+                    }
+                }
+                .description{
+                    margin: 10px 0px;
+                }
+                
+            }
+        }
+    }
+    
+    /* .suggestion-section{
+        height: 90vh;
+        overflow: auto;
+    } */
+}

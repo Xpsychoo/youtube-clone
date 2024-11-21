@@ -1,0 +1,83 @@
+.main-header-wrapper {
+    margin: 0px;
+    padding: 10px 20px;
+    justify-content: space-between;
+
+    .left-side {
+        display: flex;
+        align-items: center;
+
+        .Hamburger {
+            cursor: pointer;
+
+            svg {
+                height: 1.5em;
+                width: 1.5em;
+            }
+        }
+
+        .icon-Box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50%;
+            cursor: pointer;
+
+            .icon-img {
+                width: 2em;
+
+                svg {
+                    width: 100%;
+                }
+            }
+
+            .YouTube-text {
+                padding: 0px 5px;
+                color: #000;
+                font-size: 20px;
+                font-weight: bold;
+            }
+        }
+    }
+
+    .search-box {
+        .form-control,
+        .input-group-text {
+            border-radius: 50px;
+        }
+
+        .input-group-text {
+            cursor: pointer;
+        }
+    }
+
+    .user-profile-box {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+
+        .avatar-box {
+            display: flex;
+            align-items: center;    
+            cursor: pointer;
+            padding: 5px 7px;
+            border: 1px solid #2d2dffad;
+            border-radius: 15px;
+            margin-left: auto;
+
+            .icon {
+                margin-right: 10px;
+                svg {
+                    width: 1.5em;
+                    height: 1.5em;
+                    fill: #2d2dffad !important;
+                }
+            }
+            .text {
+                font-size: 13px;
+                font-weight: bold;
+                color: #2d2dffad;
+            }
+        }
+    }
+}

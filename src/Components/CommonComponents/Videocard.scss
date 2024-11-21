@@ -1,0 +1,42 @@
+.card-wrapper {
+    position: relative;
+    margin: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+}
+
+.imgbox {
+    min-height: 160px;
+    background-color: #efefef;
+
+    .thumbnail {
+        width: 100%;
+        height: auto;
+    }
+}
+
+.video-info {
+    padding: 10px;
+}
+
+.video-title {
+    font-size: 16px;
+    margin: 0;
+    color: #333;
+    font-weight: 500;
+}
+
+.channel-name {
+    font-size: 14px;
+    color: #555;
+    margin: 5px 0;
+}
+
+.video-stats {
+    font-size: 12px;
+    color: #999;
+}
