@@ -1,4 +1,4 @@
-/* import React, { useEffect, useState } from 'react' */
+import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom';
 import { getDataFromApi } from '../../Utils/api';
 
@@ -15,10 +15,8 @@ const VideoPlayer = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
 
-  /*   const [video, setVideo] = useState();
     const [relatedVideos, setRelatedVideos] = useState();
-   */
-  const searchresults = useSelector((state) => state.HomeFilesReducer.searchresults);
+  
   const selectedVideo = useSelector((state) => state.HomeFilesReducer.selectedVideo);
   const isSidebar = useSelector((state) => state.HomeFilesReducer.isSidebar);
 
@@ -30,7 +28,6 @@ const VideoPlayer = () => {
     try {
       const response = await getDataFromApi(`video/details/?id=${id}`);
       dispatch(setSelectedVideoAction(response));
-      /* setVideo(response) */
       console.log(response);
     } catch (error) {
       console.log(error);
@@ -40,7 +37,9 @@ const VideoPlayer = () => {
   const fetchRelatedVideos = async () => {
     try {
       const response = await getDataFromApi(`video/related-contents/?id=${id}`);
-      /*  setRelatedVideos(response); */
+      console.log(response, 'RelatedVideos dd');
+      
+       setRelatedVideos(response?.contents);
       console.log(response);
     } catch (error) {
       console.log(error);
@@ -49,10 +48,10 @@ const VideoPlayer = () => {
   console.log(selectedVideo);
 
 
-  /*  useEffect(() => {
+   useEffect(() => {
      fetchvideodetails();
      fetchRelatedVideos();
-   }, [id]) */
+   }, [id])
 
   return (
     <div className={`main-wrapper ${!isSidebar ? 'full' : ''}`}>
@@ -73,7 +72,7 @@ const VideoPlayer = () => {
             <div className="channel-details">
               <div className="channel">
                 {/* <div className="image">{selectedVideo && selectedVideo?.author?.avatar ? <img className='channel-logo' src={selectedVideo?.author?.avatar?.[0].url} alt={selectedVideo && selectedVideo?.author?.title && selectedVideo && selectedVideo?.author?.title} /> : ''}</div> */}
-                <div className="image"> <img className='channel-logo' src="https://cdn.pixabay.com/photo/2016/12/27/13/10/logo-1933884_640.png" /> </div>
+                <div className="image"> <img alt={selectedVideo ? selectedVideo?.author?.title : 'video'} className='channel-logo' src="https://cdn.pixabay.com/photo/2016/12/27/13/10/logo-1933884_640.png" /> </div>
                 <div className="channel-desc">
                   <div className="name"> {selectedVideo && selectedVideo?.author?.title} </div>
                   {selectedVideo?.author?.stats?.subscribers && <div className="subscribers-count"> {selectedVideo && selectedVideo?.author?.stats?.subscribers + ` Subscribers`} </div>}
@@ -97,8 +96,8 @@ const VideoPlayer = () => {
         </div>
         <div className="col-md-4">
           <div className="suggestion-section">
-            {searchresults?.map((item, ind) => {
-              if (item?.video?.title && item?.type == "video") {
+            {relatedVideos?.map((item, ind) => {
+              if (item?.video?.title && item?.type === "video") {
                 return (
                   <Videocard
                     width={12}

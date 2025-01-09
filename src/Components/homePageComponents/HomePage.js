@@ -6,7 +6,6 @@ import Videocard from '../CommonComponents/Videocard'
 import { useSelector } from 'react-redux'
 
 //Assets
-import Thumbnailimage from '../../Assets/Images/sirf-tum.webp';
 import { getDataFromApi } from '../../Utils/api'
 
 const HomePage = () => {
@@ -23,7 +22,7 @@ const HomePage = () => {
   }
 
   useEffect(() => {
-    // fetchSelectedCategory();
+     fetchSelectedCategory();
   }, [])
 
   return (
@@ -31,7 +30,7 @@ const HomePage = () => {
       {isSidebar && <Sidebar />}
       <div className="video-list row">
         {searchresults?.map((item, ind) => {
-          if (item?.video?.title && item?.type == "video") {
+          if (item?.video?.title && item?.type === "video") {
             return (
               <Videocard
                 width={3}
