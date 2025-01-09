@@ -14,10 +14,9 @@ const Sidebar = () => {
 
   const handleCategoryClick = async (category) => {
     try {
-      const response = await getDataFromApi(`search/?q=${category?.name}`);
-      console.log(response);  
-      dispatch(setSearchresults(response?.contents));
       navigate('/');  
+      const response = await getDataFromApi(`search/?q=${category?.name}`);
+      dispatch(setSearchresults(response?.contents));
     } catch (error) {
       console.log(error);
     }

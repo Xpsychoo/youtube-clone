@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { getDataFromApi } from '../../Utils/api';
 
-//Styles
+// Styles
 import './VideoPlayer.scss';
 import ReactPlayer from 'react-player';
 import Videocard from '../CommonComponents/Videocard';
@@ -14,17 +14,12 @@ import Sidebar from '../CommonComponents/Sidebar';
 const VideoPlayer = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
+  const [relatedVideos, setRelatedVideos] = useState();
 
-    const [relatedVideos, setRelatedVideos] = useState();
-  
   const selectedVideo = useSelector((state) => state.HomeFilesReducer.selectedVideo);
   const isSidebar = useSelector((state) => state.HomeFilesReducer.isSidebar);
 
-
-  console.log(selectedVideo);
-
-
-  const fetchvideodetails = async () => {
+  const fetchvideodetails = useCallback(async () => {
     try {
       const response = await getDataFromApi(`video/details/?id=${id}`);
       dispatch(setSelectedVideoAction(response));
@@ -32,50 +27,55 @@ const VideoPlayer = () => {
     } catch (error) {
       console.log(error);
     }
-  }
+  }, [id, dispatch]);
 
-  const fetchRelatedVideos = async () => {
+  const fetchRelatedVideos = useCallback(async () => {
     try {
       const response = await getDataFromApi(`video/related-contents/?id=${id}`);
-      console.log(response, 'RelatedVideos dd');
-      
-       setRelatedVideos(response?.contents);
+      setRelatedVideos(response?.contents);
       console.log(response);
     } catch (error) {
       console.log(error);
     }
-  }
-  console.log(selectedVideo);
-
+  }, [id]);
 
   useEffect(() => {
     fetchvideodetails();
     fetchRelatedVideos();
-  }, [id, fetchvideodetails, fetchRelatedVideos])
+  }, [id, fetchvideodetails, fetchRelatedVideos]);
 
   return (
     <div className={`main-wrapper ${!isSidebar ? 'full' : ''}`}>
       {isSidebar && <Sidebar />}
-      <div className='video-player-wrapper row'>
+      <div className="video-player-wrapper row">
         <div className="col-md-8">
           <div className="video-payer">
             <ReactPlayer
               url={`https://www.youtube.com/watch?v=${id}`}
               controls
-              width='100%'
-              height='70vh'
+              width="100%"
+              height="70vh"
               style={{ backgroundColor: '#000' }}
             />
           </div>
           <div className="video-details">
-            <div className="video-title">  {selectedVideo && selectedVideo?.title} </div>
+            <div className="video-title">{selectedVideo && selectedVideo?.title}</div>
             <div className="channel-details">
               <div className="channel">
-                {/* <div className="image">{selectedVideo && selectedVideo?.author?.avatar ? <img className='channel-logo' src={selectedVideo?.author?.avatar?.[0].url} alt={selectedVideo && selectedVideo?.author?.title && selectedVideo && selectedVideo?.author?.title} /> : ''}</div> */}
-                <div className="image"> <img alt={selectedVideo ? selectedVideo?.author?.title : 'video'} className='channel-logo' src="https://cdn.pixabay.com/photo/2016/12/27/13/10/logo-1933884_640.png" /> </div>
+                <div className="image">
+                  <img
+                    alt={selectedVideo ? selectedVideo?.author?.title : 'video'}
+                    className="channel-logo"
+                    src="https://cdn.pixabay.com/photo/2016/12/27/13/10/logo-1933884_640.png"
+                  />
+                </div>
                 <div className="channel-desc">
-                  <div className="name"> {selectedVideo && selectedVideo?.author?.title} </div>
-                  {selectedVideo?.author?.stats?.subscribers && <div className="subscribers-count"> {selectedVideo && selectedVideo?.author?.stats?.subscribers + ` Subscribers`} </div>}
+                  <div className="name">{selectedVideo && selectedVideo?.author?.title}</div>
+                  {selectedVideo?.author?.stats?.subscribers && (
+                    <div className="subscribers-count">
+                      {selectedVideo?.author?.stats?.subscribers + ` Subscribers`}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -86,35 +86,24 @@ const VideoPlayer = () => {
                     {selectedVideo?.publishedDateTime && getTimeSinceUpload(selectedVideo?.publishedDateTime) + ` ago`}
                   </div>
                 </div>
-                <div className="description">
-                  {selectedVideo?.description}
-                </div>
+                <div className="description">{selectedVideo?.description}</div>
               </div>
-
             </div>
           </div>
         </div>
         <div className="col-md-4">
           <div className="suggestion-section">
             {relatedVideos?.map((item, ind) => {
-              if (item?.video?.title && item?.type === "video") {
-                return (
-                  <Videocard
-                    width={12}
-                    key={ind}
-                    data={item}
-                  />
-                );
+              if (item?.video?.title && item?.type === 'video') {
+                return <Videocard width={12} key={ind} data={item} />;
               }
               return null;
             })}
           </div>
         </div>
-
-
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default VideoPlayer
+export default VideoPlayer;
