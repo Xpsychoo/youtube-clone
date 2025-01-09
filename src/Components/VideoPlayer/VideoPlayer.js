@@ -48,10 +48,10 @@ const VideoPlayer = () => {
   console.log(selectedVideo);
 
 
-   useEffect(() => {
-     fetchvideodetails();
-     fetchRelatedVideos();
-   }, [id])
+  useEffect(() => {
+    fetchvideodetails();
+    fetchRelatedVideos();
+  }, [id, fetchvideodetails, fetchRelatedVideos])
 
   return (
     <div className={`main-wrapper ${!isSidebar ? 'full' : ''}`}>
