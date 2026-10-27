@@ -33,8 +33,16 @@ const fetchFromYoutube = async (query = {}) => {
                 'x-rapidapi-host': 'youtube138.p.rapidapi.com',
             },
         });
-        const body = await response.json();
-        return { status: response.status, body };
+        // Some endpoints fail with an empty HTML body instead of JSON, so don't assume JSON.
+        const text = await response.text();
+        try {
+            return { status: response.status, body: JSON.parse(text) };
+        } catch {
+            return {
+                status: response.ok ? 502 : response.status,
+                body: { error: `YouTube API returned an unexpected response (${response.status})` },
+            };
+        }
     } catch (error) {
         return { status: 502, body: { error: 'Failed to reach YouTube API' } };
     }

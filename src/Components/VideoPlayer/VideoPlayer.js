@@ -17,7 +17,14 @@ const VideoPlayer = () => {
   const related = usePaginatedApi(`video/related-contents/?id=${id}`);
   useDocumentTitle(video?.title);
 
-  const relatedVideos = related.items.filter((item) => item?.type === 'video' && item.video?.videoId);
+  // The related-contents endpoint often comes back empty, so fall back to searching by the title.
+  const isVideo = (item) => item?.type === 'video' && item.video?.videoId && item.video.videoId !== id;
+  const relatedEmpty = !related.loading && !related.error && !related.items.some(isVideo);
+  const fallback = usePaginatedApi(
+    relatedEmpty && video?.title ? `search/?q=${encodeURIComponent(video.title)}` : null
+  );
+  const recommended = relatedEmpty && video?.title ? fallback : related;
+  const relatedVideos = recommended.items.filter(isVideo);
 
   return (
     <div className="watch-page">
@@ -40,18 +47,18 @@ const VideoPlayer = () => {
         {relatedVideos.map((item, ind) => (
           <Videocard key={`${item.video.videoId}-${ind}`} data={item} variant="compact" />
         ))}
-        {related.loading && <VideoListSkeleton count={relatedVideos.length ? 3 : 10} variant="compact" />}
-        {related.error && !relatedVideos.length ? (
-          <ErrorState error={related.error} onRetry={related.retry} compact />
+        {recommended.loading && <VideoListSkeleton count={relatedVideos.length ? 3 : 10} variant="compact" />}
+        {recommended.error && !relatedVideos.length ? (
+          <ErrorState error={recommended.error} onRetry={recommended.retry} compact />
         ) : (
           relatedVideos.length > 0 && (
             <LoadMore
               auto={false}
-              hasMore={related.hasMore}
-              loading={related.loading}
-              error={related.error}
-              onLoadMore={related.loadMore}
-              onRetry={related.retry}
+              hasMore={recommended.hasMore}
+              loading={recommended.loading}
+              error={recommended.error}
+              onLoadMore={recommended.loadMore}
+              onRetry={recommended.retry}
             />
           )
         )}
