@@ -1,50 +1,66 @@
-import React, { useEffect } from 'react'
-
-import './HomePage.scss'
-import Sidebar from '../CommonComponents/Sidebar'
-import Videocard from '../CommonComponents/Videocard'
+import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
-//Assets
-import { getDataFromApi } from '../../Utils/api'
-import { setSearchresults } from '../../store/Reducers/HomeFiles/HomeFilesAction'
+import './HomePage.scss'
+import Videocard from '../CommonComponents/Videocard'
+import { VideoListSkeleton } from '../CommonComponents/Skeletons'
+import { EmptyState, ErrorState, LoadMore } from '../CommonComponents/StateViews'
+import { categories } from '../../Utils/Constant'
+import { setSelectedCategory } from '../../store/Reducers/HomeFiles/HomeFilesAction'
+import { useDocumentTitle, usePaginatedApi } from '../../Utils/hooks'
+
+const chipCategories = categories.filter((item) => item.type !== 'menu');
+
+const CategoryChips = ({ selected }) => {
+  const dispatch = useDispatch();
+  return (
+    <div className="category-chips" role="tablist">
+      {chipCategories.map((item) => (
+        <button
+          key={item.name}
+          role="tab"
+          aria-selected={selected === item.name}
+          className={`chip ${selected === item.name ? 'is-active' : ''}`}
+          onClick={() => dispatch(setSelectedCategory(item.name))}
+        >
+          {item.name === 'New' ? 'All' : item.name}
+        </button>
+      ))}
+    </div>
+  );
+};
 
 const HomePage = () => {
-  const dispatch = useDispatch();
-  const isSidebar = useSelector((state) => state.HomeFilesReducer.isSidebar);
-  const searchresults = useSelector((state) => state.HomeFilesReducer.searchresults);
+  const selectedCategory = useSelector((state) => state.HomeFilesReducer.selectedCategory);
+  const { items, loading, error, hasMore, loadMore, retry } = usePaginatedApi(
+    `search/?q=${encodeURIComponent(selectedCategory)}`
+  );
+  useDocumentTitle(selectedCategory === 'New' ? 'Home' : selectedCategory);
 
-  useEffect(() => {
-    const fetchSelectedCategory = async () => {
-      try {
-        const response = await getDataFromApi(`search/?q=${'New'}`);
-        dispatch(setSearchresults(response?.contents));
-      } catch (error) {
-        console.log(error);
-      }
-    }
-
-    fetchSelectedCategory();
-  }, [dispatch])
+  const videos = items.filter((item) => item?.type === 'video' && item.video?.videoId);
 
   return (
-    <div className={`main-wrapper ${!isSidebar ? 'full' : ''}`}>
-      {isSidebar && <Sidebar />}
-      <div className="video-list row">
-        {searchresults?.map((item, ind) => {
-          if (item?.video?.title && item?.type === "video") {
-            return (
-              <Videocard
-                width={3}
-                key={ind}
-                data={item}
-              />
-            );
-          }
-          return null;
-        })}
-      </div>
+    <div className="home-page">
+      <CategoryChips selected={selectedCategory} />
 
+      {error && !videos.length ? (
+        <ErrorState error={error} onRetry={retry} />
+      ) : (
+        <div className="video-grid">
+          {videos.map((item, ind) => (
+            <Videocard key={`${item.video.videoId}-${ind}`} data={item} />
+          ))}
+          {loading && <VideoListSkeleton count={videos.length ? 4 : 12} />}
+        </div>
+      )}
+
+      {!loading && !error && !videos.length && (
+        <EmptyState title="No videos here yet" message="Try another category." />
+      )}
+
+      {videos.length > 0 && (
+        <LoadMore hasMore={hasMore} loading={loading} error={error} onLoadMore={loadMore} onRetry={retry} />
+      )}
     </div>
   )
 }

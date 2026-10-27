@@ -1,14 +1,10 @@
 import React, { useState } from 'react';
-import { /* useLocation, */ useNavigate } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
-
-// Components
-import { Form, InputGroup } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 
 // Icons
-import { FiAlignJustify } from "react-icons/fi";
-import { IoIosSearch } from "react-icons/io";
-import { BiLogIn, BiLogOut } from "react-icons/bi"; // Add login/logout icons
+import { FiMenu, FiMoon, FiSun, FiUser } from 'react-icons/fi';
+import { IoSearch } from 'react-icons/io5';
 
 // Assets
 import { ReactComponent as YoutubeIcon } from '../../Assets/Images/youtube-color-icon.svg';
@@ -16,80 +12,59 @@ import { ReactComponent as YoutubeIcon } from '../../Assets/Images/youtube-color
 // Styles
 import './Header.scss';
 
+import SearchBar from './SearchBar';
+import { setDrawerAction, setSelectedCategory, toggleSidebarAction } from '../../store/Reducers/HomeFiles/HomeFilesAction';
+import { useSidebarMode, useTheme } from '../../Utils/hooks';
 
-import { toggleSidebarAction } from '../../store/Reducers/HomeFiles/HomeFilesAction';
+export const Brand = () => {
+  const dispatch = useDispatch();
+  return (
+    <Link to="/" className="brand" onClick={() => dispatch(setSelectedCategory('New'))} aria-label="Home">
+      <YoutubeIcon className="brand__icon" />
+      <span className="brand__text">YouTube</span>
+    </Link>
+  );
+};
 
 const Header = () => {
-  const [searchText, setSearchText] = useState('');
-  const navigate = useNavigate();
-  const isSidebar = useSelector((state) => state.HomeFilesReducer.isSidebar);
-  //const isLoggedIn = useSelector((state) => state.AuthReducer.isLoggedIn); // Get user login status
-  const dispatch = useDispatch(); // To dispatch actions
-  const isLoggedIn = false;
+  const dispatch = useDispatch();
+  const sidebarMode = useSidebarMode();
+  const [theme, toggleTheme] = useTheme();
+  const [isMobileSearch, setIsMobileSearch] = useState(false);
 
-  const SearchQueryHandler = (event) => {
-    if (event === 'searchButton' || event.key === 'Enter') {
-      if (searchText.length > 0) {
-        navigate(`/search/${searchText}`);
-      }
-    }
+  const handleMenuClick = () => {
+    dispatch(sidebarMode === 'overlay' ? setDrawerAction(true) : toggleSidebarAction());
   };
-
-
-  const handleToggleSidebar = () => {
-    dispatch(toggleSidebarAction(isSidebar)); // Dispatch action to toggle sidebar
-  };
-
-  /*  const handleAuthClick = () => {
-     if (isLoggedIn) {
-       // Logic to sign out
-       console.log("Signing out...");
-       // Perform sign-out actions
-     } else {
-       // Logic to sign in
-       console.log("Signing in...");
-       // Perform sign-in actions
-     }
-   };
-  */
-  /* const { pathname } = useLocation();
-  const pageName = pathname?.split?.('/').filter(Boolean)?.[0]; */
 
   return (
-    <div className='main-header-wrapper row'>
-      <div className="left-side col-md-3">
-        <div className="Hamburger" onClick={handleToggleSidebar}>
-          <FiAlignJustify />
-        </div>
-        <div className="icon-Box" onClick={() => navigate('/')}>
-          <div className="icon-img"><YoutubeIcon /></div>
-          <div className="YouTube-text">YouTube</div>
-        </div>
+    <header className={`app-header ${isMobileSearch ? 'is-searching' : ''}`}>
+      <div className="app-header__start">
+        <button className="icon-btn" onClick={handleMenuClick} aria-label="Menu">
+          <FiMenu />
+        </button>
+        <Brand />
       </div>
-      <div className="search-box col-md-4">
-        <InputGroup className="mb-3">
-          <Form.Control
-            placeholder="Search"
-            aria-label="Search"
-            aria-describedby="Search"
-            onChange={(e) => setSearchText(e.target.value)}
-            value={searchText}
-            onKeyDown={(e) => SearchQueryHandler(e)}
-          />
-          <InputGroup.Text onClick={() => SearchQueryHandler('searchButton')} id="Search">
-            <IoIosSearch />
-          </InputGroup.Text>
-        </InputGroup>
+
+      <SearchBar autoFocus={isMobileSearch} onClose={() => setIsMobileSearch(false)} />
+
+      <div className="app-header__end">
+        <button className="icon-btn mobile-only" onClick={() => setIsMobileSearch(true)} aria-label="Search">
+          <IoSearch />
+        </button>
+        <button
+          className="icon-btn"
+          onClick={toggleTheme}
+          aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+          title={theme === 'dark' ? 'Light theme' : 'Dark theme'}
+        >
+          {theme === 'dark' ? <FiSun /> : <FiMoon />}
+        </button>
+        <button className="sign-in-btn">
+          <FiUser />
+          <span>Sign in</span>
+        </button>
       </div>
-      <div className="user-profile-box col-md-3">
-        <div className="avatar-box" onClick={() => { }}>
-          <div className="icon">
-            {isLoggedIn ? <BiLogOut style={{ color: '#2d2dffad' }} /> : <BiLogIn style={{ color: '#2d2dffad' }} />}
-          </div>
-          <div className="text">{isLoggedIn ? 'Sign Out' : 'Sign In'}</div>
-        </div>
-      </div>
-    </div>
+    </header>
   );
 };
 

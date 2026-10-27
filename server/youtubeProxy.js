@@ -1,7 +1,17 @@
 // Shared by the Vercel function, the Netlify function and the local dev server.
 // The API key only ever lives on the server, never in the browser bundle.
 const BASE_URL = 'https://youtube138.p.rapidapi.com';
-const ALLOWED_PATHS = ['search/', 'video/details/', 'video/related-contents/'];
+const ALLOWED_PATHS = [
+    'search/',
+    'auto-complete/',
+    'video/details/',
+    'video/related-contents/',
+    'video/comments/',
+    'channel/details/',
+    'channel/videos/',
+    'playlist/details/',
+    'playlist/videos/',
+];
 
 const fetchFromYoutube = async (query = {}) => {
     const { path, ...params } = query;

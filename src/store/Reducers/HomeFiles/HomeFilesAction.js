@@ -2,14 +2,6 @@
 
 import { Actions } from "../../../Utils/Constants";
 
-export function setSelectedVideoAction(selectedVideo) {
-  return (dispatch) => {
-    dispatch({
-      type: Actions.SET_SELECTED_VIDEO,
-      payload: { selectedVideo },
-    });
-  };
-}
 export function setSelectedCategory(selectedCategory) {
   return (dispatch) => {
     dispatch({
@@ -19,20 +11,17 @@ export function setSelectedCategory(selectedCategory) {
   };
 }
 
-export function setSearchresults(searchresults) {
+export function toggleSidebarAction() {
   return (dispatch) => {
-    dispatch({
-      type: Actions.SET_SEARCH_RESULTS,
-      payload: { searchresults },
-    });
-  };
-}
-export function toggleSidebarAction(isSidebar) {
-  return (dispatch) => {
-    dispatch({
-      type: Actions.TOGGLE_SIDEBAR,
-      payload: { isSidebar },
-    });
+    dispatch({ type: Actions.TOGGLE_SIDEBAR });
   };
 }
 
+export function setDrawerAction(isDrawerOpen) {
+  return (dispatch) => {
+    dispatch({
+      type: Actions.SET_DRAWER,
+      payload: { isDrawerOpen },
+    });
+  };
+}

@@ -1,107 +1,65 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React from 'react';
 import { useParams } from 'react-router-dom';
-import { getDataFromApi } from '../../Utils/api';
+import ReactPlayer from 'react-player';
 
 // Styles
 import './VideoPlayer.scss';
-import ReactPlayer from 'react-player';
+import VideoInfo from './VideoInfo';
+import Comments from './Comments';
 import Videocard from '../CommonComponents/Videocard';
-import { setSelectedVideoAction } from '../../store/Reducers/HomeFiles/HomeFilesAction';
-import { useDispatch, useSelector } from 'react-redux';
-import { getTimeSinceUpload } from '../../Utils/AppConstants';
-import Sidebar from '../CommonComponents/Sidebar';
+import { LinesSkeleton, VideoListSkeleton } from '../CommonComponents/Skeletons';
+import { ErrorState, LoadMore } from '../CommonComponents/StateViews';
+import { useApi, useDocumentTitle, usePaginatedApi } from '../../Utils/hooks';
 
 const VideoPlayer = () => {
   const { id } = useParams();
-  const dispatch = useDispatch();
-  const [relatedVideos, setRelatedVideos] = useState();
+  const { data: video, loading, error, retry } = useApi(`video/details/?id=${id}`);
+  const related = usePaginatedApi(`video/related-contents/?id=${id}`);
+  useDocumentTitle(video?.title);
 
-  const selectedVideo = useSelector((state) => state.HomeFilesReducer.selectedVideo);
-  const isSidebar = useSelector((state) => state.HomeFilesReducer.isSidebar);
-
-  const fetchvideodetails = useCallback(async () => {
-    try {
-      const response = await getDataFromApi(`video/details/?id=${id}`);
-      dispatch(setSelectedVideoAction(response));
-      console.log(response);
-    } catch (error) {
-      console.log(error);
-    }
-  }, [id, dispatch]);
-
-  const fetchRelatedVideos = useCallback(async () => {
-    try {
-      const response = await getDataFromApi(`video/related-contents/?id=${id}`);
-      setRelatedVideos(response?.contents);
-      console.log(response);
-    } catch (error) {
-      console.log(error);
-    }
-  }, [id]);
-
-  useEffect(() => {
-    fetchvideodetails();
-    fetchRelatedVideos();
-  }, [id, fetchvideodetails, fetchRelatedVideos]);
+  const relatedVideos = related.items.filter((item) => item?.type === 'video' && item.video?.videoId);
 
   return (
-    <div className={`main-wrapper ${!isSidebar ? 'full' : ''}`}>
-      {isSidebar && <Sidebar />}
-      <div className="video-player-wrapper row">
-        <div className="col-md-8">
-          <div className="video-payer">
-            <ReactPlayer
-              url={`https://www.youtube.com/watch?v=${id}`}
-              controls
-              width="100%"
-              height="70vh"
-              style={{ backgroundColor: '#000' }}
-            />
-          </div>
-          <div className="video-details">
-            <div className="video-title">{selectedVideo && selectedVideo?.title}</div>
-            <div className="channel-details">
-              <div className="channel">
-                <div className="image">
-                  <img
-                    alt={selectedVideo ? selectedVideo?.author?.title : 'video'}
-                    className="channel-logo"
-                    src="https://cdn.pixabay.com/photo/2016/12/27/13/10/logo-1933884_640.png"
-                  />
-                </div>
-                <div className="channel-desc">
-                  <div className="name">{selectedVideo && selectedVideo?.author?.title}</div>
-                  {selectedVideo?.author?.stats?.subscribers && (
-                    <div className="subscribers-count">
-                      {selectedVideo?.author?.stats?.subscribers + ` Subscribers`}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="video-description">
-                <div className="top-sec">
-                  <div className="views-count">{selectedVideo && selectedVideo?.stats?.views + ` views`}</div>
-                  <div className="timeUploaded">
-                    {selectedVideo?.publishedDateTime && getTimeSinceUpload(selectedVideo?.publishedDateTime) + ` ago`}
-                  </div>
-                </div>
-                <div className="description">{selectedVideo?.description}</div>
-              </div>
-            </div>
-          </div>
+    <div className="watch-page">
+      <div className="watch-page__primary">
+        <div className="watch-player">
+          <ReactPlayer
+            url={`https://www.youtube.com/watch?v=${id}`}
+            controls
+            playing
+            width="100%"
+            height="100%"
+          />
         </div>
-        <div className="col-md-4">
-          <div className="suggestion-section">
-            {relatedVideos?.map((item, ind) => {
-              if (item?.video?.title && item?.type === 'video') {
-                return <Videocard width={12} key={ind} data={item} />;
-              }
-              return null;
-            })}
-          </div>
-        </div>
+        {loading && <LinesSkeleton widths={['80%', '35%', '100%']} />}
+        {error && <ErrorState error={error} onRetry={retry} compact />}
+        {video && <VideoInfo video={video} />}
       </div>
+
+      <aside className="watch-page__secondary">
+        {relatedVideos.map((item, ind) => (
+          <Videocard key={`${item.video.videoId}-${ind}`} data={item} variant="compact" />
+        ))}
+        {related.loading && <VideoListSkeleton count={relatedVideos.length ? 3 : 10} variant="compact" />}
+        {related.error && !relatedVideos.length ? (
+          <ErrorState error={related.error} onRetry={related.retry} compact />
+        ) : (
+          relatedVideos.length > 0 && (
+            <LoadMore
+              auto={false}
+              hasMore={related.hasMore}
+              loading={related.loading}
+              error={related.error}
+              onLoadMore={related.loadMore}
+              onRetry={related.retry}
+            />
+          )
+        )}
+      </aside>
+
+      <section className="watch-page__comments">
+        <Comments videoId={id} total={video?.stats?.comments} />
+      </section>
     </div>
   );
 };
