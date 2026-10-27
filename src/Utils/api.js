@@ -1,16 +1,10 @@
 import axios from 'axios';
 
-const Base_url = 'https://youtube138.p.rapidapi.com'
-
-const options = {
-    params: { hl: 'en', gl: 'US' },
-    headers: {
-        'x-rapidapi-key': process.env.REACT_APP_YOUTUBE_API_KEY,
-        'x-rapidapi-host': 'youtube138.p.rapidapi.com'
-    }
-};
-
+// Requests go through our own serverless function so the API key stays on the server.
+// `url` looks like `search/?q=New` and is split into the endpoint path and its params.
 export const getDataFromApi = async (url) => {
-    const { data } = await axios.get(`${Base_url}/${url}`, options);
+    const [path, query = ''] = url.split('?');
+    const params = { path, ...Object.fromEntries(new URLSearchParams(query)) };
+    const { data } = await axios.get('/api/youtube', { params });
     return (data);
 }

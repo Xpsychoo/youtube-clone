@@ -1,0 +1,13 @@
+[functions]
+  directory = "netlify/functions"
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+# Let React Router handle client-side routes like /video/:id
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
